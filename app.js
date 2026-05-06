@@ -16,7 +16,7 @@ async function cargarFeed() {
     const xmlDoc   = parser.parseFromString(textoXML, 'application/xml');
 
     // 3. Extraemos todos los <item> del feed
-    const items = xmlDoc.querySelectorAll('item');
+    const items = xmlDoc.getElementsByTagName('item');
 
     if (items.length === 0) {
       contenedor.innerHTML = '<p class="cargando">Sin noticias por ahora.</p>';
