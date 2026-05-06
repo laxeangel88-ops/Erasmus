@@ -1,5 +1,5 @@
 // ─── CONSTANTES ─────────────────────────────────────────────
-const RSS_URL = 'https://raw.githubusercontent.com/laxeangel88-ops/Erasmus/main/erasmus.xml';
+const RSS_URL = './erasmus.xml';
 
 // ─── FUNCIÓN PRINCIPAL ────────────────────────────────────────
 async function cargarFeed() {
