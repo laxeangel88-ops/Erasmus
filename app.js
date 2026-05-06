@@ -1,6 +1,6 @@
 // ─── CONSTANTES ─────────────────────────────────────────────
 // URL del feed XML en GitHub (raw = texto plano, no HTML)
-const RSS_URL = 'https://raw.githubusercontent.com/[laxeangel88-ops]/erasmus-feed/main/erasmus.xml';
+const RSS_URL = 'https://raw.githubusercontent.com/laxeangel88-ops/Erasmus/main/erasmus.xml';
 
 // ─── FUNCIÓN PRINCIPAL ────────────────────────────────────────
 async function cargarFeed() {
