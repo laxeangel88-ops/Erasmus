@@ -85,3 +85,70 @@ footer a { color: var(--azul-erasmus); }
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* Definimos variables para el efecto de luz */
+:root {
+  --color-luz: rgba(255, 255, 255, 0.15); /* Cambia esto al color de tu instituto si quieres */
+}
+
+/* El contenedor del muro necesita perspectiva para el 3D */
+#feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  perspective: 1000px; /* Vital para el efecto 3D */
+  padding: 20px;
+}
+
+/* Diseño base de la tarjeta */
+.tarjeta {
+  position: relative;
+  background: rgba(20, 20, 20, 0.8); /* Fondo oscuro semitransparente */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  color: white;
+  overflow: hidden;
+  backdrop-filter: blur(10px); /* Efecto cristal */
+  
+  /* Transiciones suaves para cuando el ratón entra/sale */
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.3s ease;
+  transform-style: preserve-3d;
+  opacity: 0; 
+}
+
+/* Sombra dinámica para resaltar el 3D */
+.tarjeta:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+/* El foco de luz (Spotlight) que crearemos con JS */
+.tarjeta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    800px circle at var(--mouse-x) var(--mouse-y), 
+    var(--color-luz),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Para que no interfiera con los clics */
+  z-index: 1;
+}
+
+.tarjeta:hover::before {
+  opacity: 1;
+}
+
+/* Elevar el texto por encima del foco de luz */
+.tarjeta-header, h2, .descripcion, .autor {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(30px); /* Empuja el texto hacia afuera en 3D */
+}
