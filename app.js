@@ -1,67 +1,87 @@
-// ─── CONSTANTES ─────────────────────────────────────────────
-const RSS_URL = './erasmus.xml';
+// ─── CONSTANTES ──────────────────────────────────────────────
+const FEED_URL  = 'https://erasmus-plus.ec.europa.eu/news/rss';
+const PROXY_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(FEED_URL)}`;
 
-// ─── FUNCIÓN PRINCIPAL ────────────────────────────────────────
+// ─── FUNCIÓN PRINCIPAL ───────────────────────────────────────
 async function cargarFeed() {
   const contenedor = document.getElementById('feed');
 
   try {
-    const respuesta = await fetch(RSS_URL);
-    const textoXML  = await respuesta.text();
+    // 1. Pedimos el XML a través del proxy (evita el bloqueo CORS)
+    const respuesta = await fetch(PROXY_URL);
+    const data      = await respuesta.json();     // allorigins devuelve JSON
+    const textoXML  = data.contents;              // el XML está dentro de .contents
 
+    // 2. Convertimos el texto XML a documento navegable
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(textoXML, 'application/xml');
 
-    const items = Array.from(xmlDoc.getElementsByTagName('item'));
-
-    if (items.length === 0) {
-      contenedor.innerHTML = '<p class="cargando">🌍 Sin noticias de movilidad por ahora.</p>';
+    // 3. Comprobamos si hay error de parseo
+    const parseError = xmlDoc.querySelector('parsererror');
+    if (parseError) {
+      contenedor.innerHTML = '<p class="cargando">Error al leer el feed RSS.</p>';
       return;
     }
 
+    // 4. Extraemos los <item>
+    const items = Array.from(xmlDoc.getElementsByTagName('item'));
+
+    if (items.length === 0) {
+      contenedor.innerHTML = '<p class="cargando">Sin noticias por ahora.</p>';
+      return;
+    }
+
+    // 5. Pintamos las tarjetas
     contenedor.innerHTML = '';
 
-    items.forEach((item, index) => {
+    items.forEach(item => {
       const titulo      = item.getElementsByTagName('title')[0]?.textContent || 'Sin título';
       const descripcion = item.getElementsByTagName('description')[0]?.textContent || '';
       const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
-      const autor       = item.getElementsByTagName('author')[0]?.textContent || 'Equipo Erasmus+';
-      const categoria   = item.getElementsByTagName('category')[0]?.textContent || 'Erasmus+';
+      const enlace      = item.getElementsByTagName('link')[0]?.textContent || '#';
+
+      // La categoría viene como slug en el feed de Europa (ej: "higher-education")
+      const categoriaRaw = item.getElementsByTagName('category')[0]?.textContent || 'erasmus';
+      const categoria    = categoriaRaw.toLowerCase().replace(/\s+/g, '-');
+
+      // Etiqueta legible para mostrar en la tarjeta
+      const etiquetas = {
+        'higher-education':      '🎓 Universidad',
+        'vocational-education':  '🔧 FP',
+        'youth':                 '🌍 Juventud',
+        'sport':                 '⚽ Deporte',
+      };
+      const etiqueta = etiquetas[categoria] || '📡 Erasmus+';
 
       const tarjeta = document.createElement('article');
-      
-      // Añadimos clase para animación de entrada y el retraso
-      tarjeta.className = 'tarjeta animar-entrada';
+      tarjeta.className = 'tarjeta';
       tarjeta.dataset.categoria = categoria;
-      tarjeta.style.animationDelay = `${index * 0.1}s`;
 
-      // Estructuramos el HTML interno de la tarjeta
       tarjeta.innerHTML = `
-        <div class="tarjeta-header">
-            <span class="pais">${categoria}</span>
-            <span class="fecha">📅 ${new Date(fecha).toLocaleDateString('es-ES', {
-              day: '2-digit', month: 'short', year: 'numeric'
-            })}</span>
-        </div>
+        <p class="pais">${etiqueta}</p>
         <h2>${titulo}</h2>
-        <p class="descripcion">${descripcion}</p>
-        <p class="autor">👤 ${autor}</p>
+        <p>${descripcion.substring(0, 200)}...</p>
+        <p class="fecha">${new Date(fecha).toLocaleDateString('es-ES', {
+          day: 'numeric', month: 'long', year: 'numeric'
+        })}</p>
+        <a class="autor" href="${enlace}" target="_blank" rel="noopener">
+          Leer noticia completa →
+        </a>
       `;
 
       contenedor.appendChild(tarjeta);
     });
 
-    // 👇 AQUÍ ACTIVAMOS TODO UNA VEZ CREADAS LAS TARJETAS 👇
+    // 6. Activamos los filtros
     activarFiltros();
-    activarEfectos3D(); // <-- La llamada mágica al 3D
 
   } catch (error) {
     console.error('Error al cargar el feed:', error);
-    contenedor.innerHTML = '<p class="cargando error-msg">❌ No se pudieron cargar las noticias en este momento. Inténtalo más tarde.</p>';
+    contenedor.innerHTML = '<p class="cargando">Error al cargar las noticias. Inténtalo de nuevo.</p>';
   }
 }
 
-// ─── FILTROS POR PAÍS SUAVES ──────────────────────────────────
+// ─── FILTROS ─────────────────────────────────────────────────
 function activarFiltros() {
   const botones    = document.querySelectorAll('.filtro-btn');
   const contenedor = document.getElementById('feed');
@@ -76,54 +96,14 @@ function activarFiltros() {
 
       tarjetas.forEach(tarjeta => {
         if (categoria === 'todos' || tarjeta.dataset.categoria === categoria) {
-          tarjeta.style.display = 'block'; 
-          setTimeout(() => tarjeta.style.opacity = '1', 10); 
+          tarjeta.style.display = '';
         } else {
-          tarjeta.style.opacity = '0';
-          setTimeout(() => {
-              if (tarjeta.style.opacity === '0') {
-                  tarjeta.style.display = 'none';
-              }
-          }, 300); 
+          tarjeta.style.display = 'none';
         }
       });
     });
   });
 }
 
-// ─── LOKERA MÁXIMA: EFECTO 3D Y SPOTLIGHT ─────────────────────
-function activarEfectos3D() {
-  const tarjetas = document.querySelectorAll('.tarjeta');
-
-  tarjetas.forEach(tarjeta => {
-    tarjeta.addEventListener('mousemove', (e) => {
-      const rect = tarjeta.getBoundingClientRect();
-      const x = e.clientX - rect.left; 
-      const y = e.clientY - rect.top;  
-
-      // 1. Efecto Spotlight: Actualizamos las variables CSS
-      tarjeta.style.setProperty('--mouse-x', `${x}px`);
-      tarjeta.style.setProperty('--mouse-y', `${y}px`);
-
-      // 2. Efecto 3D: Calculamos la rotación
-      const centroX = rect.width / 2;
-      const centroY = rect.height / 2;
-      
-      const intensidad = 20; 
-      
-      const rotacionX = ((y - centroY) / centroY) * -intensidad;
-      const rotacionY = ((x - centroX) / centroX) * intensidad;
-
-      // Aplicamos la rotación
-      tarjeta.style.transform = `perspective(1000px) rotateX(${rotacionX}deg) rotateY(${rotacionY}deg) scale3d(1.02, 1.02, 1.02)`;
-    });
-
-    // Resetear la tarjeta cuando el ratón sale
-    tarjeta.addEventListener('mouseleave', () => {
-      tarjeta.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-    });
-  });
-}
-
-// ─── ARRANQUE ─────────────────────────────────────────────────
+// ─── ARRANQUE ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', cargarFeed);
