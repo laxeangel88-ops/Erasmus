@@ -14,7 +14,7 @@ en programas de movilidad Erasmus+.
 RSS 2.0 · XML · XSD · HTML5 · CSS3 · JavaScript
 
 ## 🚀 Ver el proyecto
-https://[usuario].github.io/erasmus-feed/
+https://laxeangel88-ops.github.io/Erasmus/
 
 ## 📁 Estructura
 - `erasmus.xml` — Feed RSS con las noticias
