@@ -30,26 +30,12 @@ async function cargarFeed() {
 
       const tarjeta = document.createElement('article');
       
-      // 🪄 MAGIA 1: Añadimos clase para animación y retraso escalonado
+      // 🪄 TOQUE VISUAL: Añadimos clase para animación y retraso escalonado
       tarjeta.className = 'tarjeta animar-entrada';
       tarjeta.dataset.categoria = categoria;
       tarjeta.style.animationDelay = `${index * 0.1}s`;
 
-      // 🪄 MAGIA 2: Lógica para truncar textos largos
-      let htmlDescripcion = `<p class="descripcion">${descripcion}</p>`;
-      
-      if (descripcion.length > 120) {
-        const descCorta = descripcion.substring(0, 120).trim() + '...';
-        htmlDescripcion = `
-          <div class="descripcion-contenedor">
-            <p class="texto-visible">${descCorta}</p>
-            <p class="texto-completo oculto">${descripcion}</p>
-            <button class="leer-mas-btn">Leer más</button>
-          </div>
-        `;
-      }
-
-      // Estructuramos el HTML interno de la tarjeta
+      // Estructuramos el HTML interno de la tarjeta limpio
       tarjeta.innerHTML = `
         <div class="tarjeta-header">
             <span class="pais">${categoria}</span>
@@ -58,47 +44,20 @@ async function cargarFeed() {
             })}</span>
         </div>
         <h2>${titulo}</h2>
-        ${htmlDescripcion}
+        <p class="descripcion">${descripcion}</p>
         <p class="autor">👤 ${autor}</p>
       `;
 
       contenedor.appendChild(tarjeta);
     });
 
-    // Activamos los eventos después de crear las tarjetas
-    activarBotonesLeerMas();
+    // Activamos los filtros después de crear las tarjetas
     activarFiltros();
 
   } catch (error) {
     console.error('Error al cargar el feed:', error);
     contenedor.innerHTML = '<p class="cargando error-msg">❌ No se pudieron cargar las noticias en este momento. Inténtalo más tarde.</p>';
   }
-}
-
-// ─── FUNCIONES INTERACTIVAS (UX) ──────────────────────────────
-
-// Lógica para expandir/contraer las descripciones largas
-function activarBotonesLeerMas() {
-    const botones = document.querySelectorAll('.leer-mas-btn');
-    
-    botones.forEach(boton => {
-        boton.addEventListener('click', (e) => {
-            const contenedor = e.target.closest('.descripcion-contenedor');
-            const textoVisible = contenedor.querySelector('.texto-visible');
-            const textoCompleto = contenedor.querySelector('.texto-completo');
-
-            // Alternamos las clases para mostrar u ocultar
-            if (textoCompleto.classList.contains('oculto')) {
-                textoVisible.classList.add('oculto');
-                textoCompleto.classList.remove('oculto');
-                boton.textContent = 'Leer menos';
-            } else {
-                textoVisible.classList.remove('oculto');
-                textoCompleto.classList.add('oculto');
-                boton.textContent = 'Leer más';
-            }
-        });
-    });
 }
 
 // ─── FILTROS POR PAÍS SUAVES ──────────────────────────────────
@@ -116,19 +75,19 @@ function activarFiltros() {
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
       tarjetas.forEach(tarjeta => {
-        // 🪄 MAGIA 3: Animación suave al filtrar
+        // 🪄 TOQUE VISUAL: Transición suave al filtrar
         if (categoria === 'todos' || tarjeta.dataset.categoria === categoria) {
-          tarjeta.style.display = 'block'; // O 'flex', dependiendo de vuestro CSS
-          // Pequeño timeout para que el navegador registre el display antes del cambio de opacidad
+          tarjeta.style.display = 'block'; // O 'flex', dependiendo del CSS base
+          // Timeout mínimo para que el navegador aplique la transición de opacidad
           setTimeout(() => tarjeta.style.opacity = '1', 10); 
         } else {
           tarjeta.style.opacity = '0';
-          // Esperamos a que la transición de opacidad termine antes de quitarlo del flujo
+          // Esperamos a que la transición visual termine antes de ocultar la caja
           setTimeout(() => {
               if (tarjeta.style.opacity === '0') {
                   tarjeta.style.display = 'none';
               }
-          }, 300); // Estos 300ms deben coincidir con la transición en CSS
+          }, 300); // Sincronizado con los 0.3s del CSS
         }
       });
     });
