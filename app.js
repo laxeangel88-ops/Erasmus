@@ -1,8 +1,6 @@
-// ─── CONSTANTES ──────────────────────────────────────────────
 const FEED_ORIGINAL = 'https://iesaljada.murciaeduca.es/feed/';
 const PROXY_URL = `https://corsproxy.io/?url=${encodeURIComponent(FEED_ORIGINAL)}`;
 
-// ─── FUNCIÓN PRINCIPAL ───────────────────────────────────────
 async function cargarFeed() {
   const contenedor = document.getElementById('feed');
 
@@ -28,40 +26,49 @@ async function cargarFeed() {
     contenedor.innerHTML = '';
 
     items.forEach(item => {
-      // Función auxiliar para leer texto con o sin CDATA
-      const getText = (tag) => {
-        const el = item.getElementsByTagName(tag)[0];
-        if (!el) return '';
-        return (el.innerHTML || el.textContent || '')
-          .replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-      };
+      const titulo      = item.getElementsByTagName('title')[0]?.textContent || 'Sin título';
+      const descripcion = item.getElementsByTagName('description')[0]?.textContent || '';
+      const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
+      const enlace      = item.getElementsByTagName('link')[0]?.textContent || '#';
+      const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
 
-      const titulo      = getText('title')       || 'Sin título';
-      const descripcion = getText('description') || '';
-      const fecha       = getText('pubDate')     || '';
-      const enlace      = getText('link')        || '#';
-      const categoriaRaw= getText('category')    || 'General';
-
-      // Limpiamos etiquetas HTML de la descripción
       const tmp = document.createElement('div');
       tmp.innerHTML = descripcion;
-      const textoLimpio = tmp.textContent || tmp.innerText || '';
+      const textoLimpio = (tmp.textContent || '').substring(0, 200);
 
       const tarjeta = document.createElement('article');
       tarjeta.className = 'tarjeta';
       tarjeta.dataset.categoria = categoriaRaw.toLowerCase();
+      tarjeta.style.display = 'block'; // ← forzamos que sean visibles al crear
 
-      tarjeta.innerHTML = `
-        <p class="pais">${categoriaRaw}</p>
-        <h2>${titulo}</h2>
-        <p>${textoLimpio.substring(0, 200)}...</p>
-        <p class="fecha">${new Date(fecha).toLocaleDateString('es-ES', {
-          day: 'numeric', month: 'long', year: 'numeric'
-        })}</p>
-        <a class="autor" href="${enlace}" target="_blank" rel="noopener">
-          Leer noticia completa →
-        </a>
-      `;
+      const pPais = document.createElement('p');
+      pPais.className = 'pais';
+      pPais.textContent = categoriaRaw;
+
+      const h2 = document.createElement('h2');
+      h2.textContent = titulo;
+
+      const pDesc = document.createElement('p');
+      pDesc.textContent = textoLimpio + '...';
+
+      const pFecha = document.createElement('p');
+      pFecha.className = 'fecha';
+      pFecha.textContent = new Date(fecha).toLocaleDateString('es-ES', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      const a = document.createElement('a');
+      a.className = 'autor';
+      a.href = enlace;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = 'Leer noticia completa →';
+
+      tarjeta.appendChild(pPais);
+      tarjeta.appendChild(h2);
+      tarjeta.appendChild(pDesc);
+      tarjeta.appendChild(pFecha);
+      tarjeta.appendChild(a);
 
       contenedor.appendChild(tarjeta);
     });
@@ -74,7 +81,6 @@ async function cargarFeed() {
   }
 }
 
-// ─── FILTROS ─────────────────────────────────────────────────
 function activarFiltros() {
   const botones    = document.querySelectorAll('.filtro-btn');
   const contenedor = document.getElementById('feed');
@@ -88,16 +94,13 @@ function activarFiltros() {
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
       tarjetas.forEach(tarjeta => {
-        if (categoria === 'todos' ||
-            tarjeta.dataset.categoria.includes(categoria)) {
-          tarjeta.style.display = '';
-        } else {
-          tarjeta.style.display = 'none';
-        }
+        tarjeta.style.display =
+          (categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria))
+          ? 'block'
+          : 'none';
       });
     });
   });
 }
 
-// ─── ARRANQUE ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', cargarFeed);
