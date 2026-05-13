@@ -1,6 +1,6 @@
 // ─── CONSTANTES ──────────────────────────────────────────────
 const FEED_ORIGINAL = 'https://iesaljada.murciaeduca.es/feed/';
-const PROXY_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(FEED_ORIGINAL)}`;
+const PROXY_URL = `https://corsproxy.io/?url=${encodeURIComponent(FEED_ORIGINAL)}`;
 
 // ─── FUNCIÓN PRINCIPAL ───────────────────────────────────────
 async function cargarFeed() {
@@ -8,8 +8,7 @@ async function cargarFeed() {
 
   try {
     const respuesta = await fetch(PROXY_URL);
-    const data      = await respuesta.json();
-    const textoXML  = data.contents;
+    const textoXML  = await respuesta.text();
 
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(textoXML, 'application/xml');
@@ -19,8 +18,6 @@ async function cargarFeed() {
       return;
     }
 
-    // Cogemos TODOS los items y mostramos todos (sin filtrar por Erasmus)
-    // para que siempre haya noticias visibles
     const items = Array.from(xmlDoc.getElementsByTagName('item'));
 
     if (items.length === 0) {
@@ -31,13 +28,21 @@ async function cargarFeed() {
     contenedor.innerHTML = '';
 
     items.forEach(item => {
-      const titulo      = item.getElementsByTagName('title')[0]?.textContent || 'Sin título';
-      const descripcion = item.getElementsByTagName('description')[0]?.textContent || '';
-      const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
-      const enlace      = item.getElementsByTagName('link')[0]?.textContent || '#';
-      const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
+      // Función auxiliar para leer texto con o sin CDATA
+      const getText = (tag) => {
+        const el = item.getElementsByTagName(tag)[0];
+        if (!el) return '';
+        return (el.innerHTML || el.textContent || '')
+          .replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+      };
 
-      // Limpiamos el HTML de la descripción si viene con etiquetas
+      const titulo      = getText('title')       || 'Sin título';
+      const descripcion = getText('description') || '';
+      const fecha       = getText('pubDate')     || '';
+      const enlace      = getText('link')        || '#';
+      const categoriaRaw= getText('category')    || 'General';
+
+      // Limpiamos etiquetas HTML de la descripción
       const tmp = document.createElement('div');
       tmp.innerHTML = descripcion;
       const textoLimpio = tmp.textContent || tmp.innerText || '';
