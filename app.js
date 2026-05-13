@@ -30,12 +30,12 @@ async function cargarFeed() {
 
       const tarjeta = document.createElement('article');
       
-      // 🪄 TOQUE VISUAL: Añadimos clase para animación y retraso escalonado
+      // Añadimos clase para animación de entrada y el retraso
       tarjeta.className = 'tarjeta animar-entrada';
       tarjeta.dataset.categoria = categoria;
       tarjeta.style.animationDelay = `${index * 0.1}s`;
 
-      // Estructuramos el HTML interno de la tarjeta limpio
+      // Estructuramos el HTML interno de la tarjeta
       tarjeta.innerHTML = `
         <div class="tarjeta-header">
             <span class="pais">${categoria}</span>
@@ -51,8 +51,9 @@ async function cargarFeed() {
       contenedor.appendChild(tarjeta);
     });
 
-    // Activamos los filtros después de crear las tarjetas
+    // 👇 AQUÍ ACTIVAMOS TODO UNA VEZ CREADAS LAS TARJETAS 👇
     activarFiltros();
+    activarEfectos3D(); // <-- La llamada mágica al 3D
 
   } catch (error) {
     console.error('Error al cargar el feed:', error);
@@ -67,7 +68,6 @@ function activarFiltros() {
 
   botones.forEach(boton => {
     boton.addEventListener('click', () => {
-      // Control de botones activos
       botones.forEach(b => b.classList.remove('activo'));
       boton.classList.add('activo');
 
@@ -75,21 +75,52 @@ function activarFiltros() {
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
       tarjetas.forEach(tarjeta => {
-        // 🪄 TOQUE VISUAL: Transición suave al filtrar
         if (categoria === 'todos' || tarjeta.dataset.categoria === categoria) {
-          tarjeta.style.display = 'block'; // O 'flex', dependiendo del CSS base
-          // Timeout mínimo para que el navegador aplique la transición de opacidad
+          tarjeta.style.display = 'block'; 
           setTimeout(() => tarjeta.style.opacity = '1', 10); 
         } else {
           tarjeta.style.opacity = '0';
-          // Esperamos a que la transición visual termine antes de ocultar la caja
           setTimeout(() => {
               if (tarjeta.style.opacity === '0') {
                   tarjeta.style.display = 'none';
               }
-          }, 300); // Sincronizado con los 0.3s del CSS
+          }, 300); 
         }
       });
+    });
+  });
+}
+
+// ─── LOKERA MÁXIMA: EFECTO 3D Y SPOTLIGHT ─────────────────────
+function activarEfectos3D() {
+  const tarjetas = document.querySelectorAll('.tarjeta');
+
+  tarjetas.forEach(tarjeta => {
+    tarjeta.addEventListener('mousemove', (e) => {
+      const rect = tarjeta.getBoundingClientRect();
+      const x = e.clientX - rect.left; 
+      const y = e.clientY - rect.top;  
+
+      // 1. Efecto Spotlight: Actualizamos las variables CSS
+      tarjeta.style.setProperty('--mouse-x', `${x}px`);
+      tarjeta.style.setProperty('--mouse-y', `${y}px`);
+
+      // 2. Efecto 3D: Calculamos la rotación
+      const centroX = rect.width / 2;
+      const centroY = rect.height / 2;
+      
+      const intensidad = 20; 
+      
+      const rotacionX = ((y - centroY) / centroY) * -intensidad;
+      const rotacionY = ((x - centroX) / centroX) * intensidad;
+
+      // Aplicamos la rotación
+      tarjeta.style.transform = `perspective(1000px) rotateX(${rotacionX}deg) rotateY(${rotacionY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+
+    // Resetear la tarjeta cuando el ratón sale
+    tarjeta.addEventListener('mouseleave', () => {
+      tarjeta.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
     });
   });
 }
