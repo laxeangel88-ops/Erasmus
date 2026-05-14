@@ -129,12 +129,26 @@ function activarEfectos3D() {
 // ─── 4. LA BROMA (MODO CAOS) ──────────────────────────────────
 function iniciarBromaPopups() {
   const mensajesError = [
-    "⚠️ ERROR Crítico: El esquema XSD de Ángel no responde.",
-    "🔥 ALERTA: El Frontend de Francisco está consumiendo demasiada RAM.",
-    "💀 Se ha detectado una fuga de memoria en el servidor del IES Aljada.",
-    "🚨 El Feed Erasmus+ está a punto de explotar. Cierra esta ventana rápido.",
-    "👾 Virus 'LokeraMáxima.exe' descargado con éxito.",
-    "⚠️ Error 404: Paciencia no encontrada."
+    "⚠️ El CSS de Francisco se ha derretido y está goteando por detrás de tu monitor.",
+    "🔥 El archivo XML de Ángel tiene hambre. Por favor, introduce un bocadillo por la ranura del USB.",
+    "💀 Tu app.js acaba de fundar una secta en Puente Tocinos. Tienen antorchas y exigen donativos.",
+    "🚨 Un pastel de carne ha interceptado el paquete OSPF. Red inalcanzable.",
+    "👾 El router de Cisco se ha enamorado del switch. Tráfico detenido por tensión romántica.",
+    "⚠️ Windows Server 2012 ha exigido que le cantes una nana para poder arrancar.",
+    "💾 Shopify ha puesto a la venta tus recuerdos de la infancia. El CTR es sorprendentemente alto.",
+    "🧹 Los alumnos del Erasmus han sido sustituidos por palomas cibernéticas. Becas canceladas.",
+    "💸 Error 404: El color azul ha dejado de existir en esta dimensión.",
+    "👁️ Un cursor de PL/SQL se ha escapado y está escondido debajo de tu teclado. No hagas movimientos bruscos.",
+    "🤖 Tu profesor de ASIR ha sido reemplazado por un holograma. Finge que entiendes la clase.",
+    "🛑 El avión a Polonia está siendo pilotado por una etiqueta de HTML que Francisco dejó sin cerrar.",
+    "⏳ Cicada 3301 ha resuelto el enigma: la respuesta es un limón murciano bailando bachata.",
+    "📉 Las VLANs se han enredado. Ahora estás en la misma red local que una lavadora en Japón.",
+    "✈️ La tarjeta de red huele a tostadas quemadas. El servidor de la consejería está desayunando.",
+    "🔌 Cuidado. El ratón de tu ordenador está respirando de forma muy agitada.",
+    "👨‍💻 El kernel de Linux ha empezado a hablar en arameo antiguo. Cierra los ojos.",
+    "🎨 Los márgenes del CSS han conspirado para expulsarte físicamente de la habitación.",
+    "🚀 Un pingüino ha interceptado la conexión de la página del instituto. Dale un pescado para continuar.",
+    "👑 Pulsa Aceptar si confirmas que eres un holograma proyectado por el IES Aljada."
   ];
 
   setInterval(() => {
@@ -168,7 +182,7 @@ function iniciarBromaPopups() {
     btnCerrar.addEventListener('click', () => popup.remove());
     btnOk.addEventListener('click', () => popup.remove());
 
-  }, 500); // 3500ms = 3.5 segundos. 
+  }, 1000); // 3500ms = 3.5 segundos. 
 }
 
 // ─── ARRANQUE GLOBAL ──────────────────────────────────────────
