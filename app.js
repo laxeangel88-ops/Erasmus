@@ -21,7 +21,6 @@ async function cargarFeed() {
   contenedor.innerHTML = '<p class="cargando">Cargando noticias...</p>';
 
   try {
-    // Cargamos los dos feeds en paralelo
     const resultados = await Promise.allSettled(
       FEEDS.map(f => fetch(proxy(f.url)).then(r => r.text()))
     );
@@ -102,6 +101,7 @@ async function cargarFeed() {
     }
 
     activarFiltros();
+    activarDropdowns();
 
   } catch (error) {
     console.error('Error:', error);
@@ -119,16 +119,38 @@ function activarFiltros() {
       botones.forEach(b => b.classList.remove('activo'));
       boton.classList.add('activo');
 
-      const fuente   = boton.dataset.fuente || 'todos';
-      const categoria = boton.dataset.cat   || 'todos';
+      const fuente    = boton.dataset.fuente || 'todos';
+      const categoria = boton.dataset.cat    || 'todos';
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
       tarjetas.forEach(tarjeta => {
-        const coincideFuente   = fuente === 'todos'    || tarjeta.dataset.fuente === fuente;
+        const coincideFuente    = fuente === 'todos'    || tarjeta.dataset.fuente === fuente;
         const coincideCategoria = categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria);
-        tarjeta.style.display = (coincideFuente && coincideCategoria) ? 'block' : 'none';
+        tarjeta.style.display   = (coincideFuente && coincideCategoria) ? 'block' : 'none';
       });
+
+      // Cierra todos los desplegables al seleccionar
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
     });
+  });
+}
+
+// ─── DESPLEGABLES ────────────────────────────────────────────
+function activarDropdowns() {
+  document.querySelectorAll('.dropdown-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dropdown = btn.parentElement;
+      document.querySelectorAll('.dropdown').forEach(d => {
+        if (d !== dropdown) d.classList.remove('abierto');
+      });
+      dropdown.classList.toggle('abierto');
+    });
+  });
+
+  // Cierra al hacer clic fuera
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
   });
 }
 
