@@ -168,7 +168,7 @@ function iniciarBromaPopups() {
     btnCerrar.addEventListener('click', () => popup.remove());
     btnOk.addEventListener('click', () => popup.remove());
 
-  }, 5000); // 3500ms = 3.5 segundos. 
+  }, 500); // 3500ms = 3.5 segundos. 
 }
 
 // ─── ARRANQUE GLOBAL ──────────────────────────────────────────
