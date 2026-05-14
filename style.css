@@ -122,6 +122,72 @@ article.tarjeta:hover { transform: translateY(-4px); }
   color: var(--azul-erasmus); text-decoration: none; }
 .tarjeta .autor:hover { text-decoration: underline; }
 
+/* ── Desplegables ── */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-btn {
+  background: white;
+  border: 2px solid var(--azul-erasmus);
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--azul-erasmus);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.dropdown-btn:hover {
+  background: var(--azul-erasmus);
+  color: white;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 0.5rem;
+  z-index: 100;
+  min-width: 180px;
+}
+
+.dropdown-menu .filtro-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin: 2px 0;
+  border: none;
+  color: var(--texto);
+}
+
+.dropdown-menu .filtro-btn:hover {
+  background: var(--fondo);
+  border-color: transparent;
+}
+
+.dropdown-menu .filtro-btn.activo {
+  background: var(--azul-erasmus);
+  color: white;
+}
+
+.dropdown.abierto .dropdown-menu {
+  display: block;
+}
+
+.dropdown.abierto .dropdown-btn {
+  background: var(--azul-erasmus);
+  color: white;
+}
+
 footer { text-align: center; padding: 2rem;
   color: var(--texto-suave); font-size: 0.9rem; }
 footer a { color: var(--azul-erasmus); }
