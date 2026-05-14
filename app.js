@@ -127,3 +127,56 @@ function activarEfectos3D() {
 }
 
 document.addEventListener('DOMContentLoaded', cargarFeed); 
+
+// ─── MODO CAOS: BROMA POP-UPS ─────────────────────────────────
+function iniciarBromaPopups() {
+  // Mensajes aleatorios para volverles locos
+  const mensajesError = [
+    "⚠️ ERROR Crítico: El esquema XSD de Ángel no responde.",
+    "🔥 ALERTA: El Frontend de Francisco está consumiendo demasiada RAM.",
+    "💀 Se ha detectado una fuga de memoria en el servidor del IES Aljada.",
+    "🚨 El Feed Erasmus+ está a punto de explotar. Cierra esta ventana rápido.",
+    "👾 Virus 'LokeraMáxima.exe' descargado con éxito.",
+    "⚠️ Error 404: Paciencia no encontrada."
+  ];
+
+  // Cada 3.5 segundos sale un pop-up nuevo
+  setInterval(() => {
+    const popup = document.createElement('div');
+    popup.className = 'popup-molesto';
+
+    // Calculamos una posición aleatoria en la pantalla
+    const randomX = Math.floor(Math.random() * (window.innerWidth - 300));
+    const randomY = Math.floor(Math.random() * (window.innerHeight - 150));
+    
+    popup.style.left = `${randomX}px`;
+    popup.style.top = `${randomY}px`;
+
+    // Elegimos un mensaje al azar
+    const mensajeAleatorio = mensajesError[Math.floor(Math.random() * mensajesError.length)];
+
+    popup.innerHTML = `
+      <div class="popup-cabecera">
+        <span>Mensaje del Sistema</span>
+        <button class="cerrar-popup">X</button>
+      </div>
+      <div class="popup-cuerpo">
+        <p>${mensajeAleatorio}</p>
+        <button class="btn-ok">Aceptar</button>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    // Lógica para que los botones cierren SU propio pop-up
+    const btnCerrar = popup.querySelector('.cerrar-popup');
+    const btnOk = popup.querySelector('.btn-ok');
+
+    btnCerrar.addEventListener('click', () => popup.remove());
+    btnOk.addEventListener('click', () => popup.remove());
+
+  }, 3500); // 3500 milisegundos = 3.5 segundos. ¡Bájalo si quieres más caos!
+}
+
+// ⚠️ DESCOMENTA LA SIGUIENTE LÍNEA PARA ACTIVAR LA BROMA ⚠️
+// iniciarBromaPopups();
