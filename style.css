@@ -6,13 +6,13 @@
   --tarjeta: #FFFFFF;
   --texto: #1A1A2E;
   --texto-suave: #6B7280;
-  --sombra: 0 2px 8px rgba(0,0,0,0.1);
+  --sombra: 0 4px 15px rgba(0,0,0,0.05); /* Sombra un poco más suave por defecto */
   --radio: 12px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', system-ui, sans-serif;
-  background: var(--fondo); color: var(--texto); }
+  background: var(--fondo); color: var(--texto); overflow-x: hidden; }
 
 /* Header */
 header { background: var(--azul-erasmus); color: white;
@@ -30,7 +30,7 @@ header h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
 .filtro-btn:hover, .filtro-btn.activo {
   background: var(--azul-erasmus); color: white; }
 
-/* Grid de tarjetas */
+/* Grid de tarjetas: Añadimos la perspectiva para el 3D */
 .feed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -38,21 +38,73 @@ header h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
   padding: 0 2rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  perspective: 1000px; /* VITAL para que las tarjetas se inclinen hacia adentro/afuera */
 }
 
-/* Tarjeta de noticia */
+/* 🚀 LOKERA MÁXIMA: Tarjeta base para 3D */
 article.tarjeta {
+  position: relative;
   background: var(--tarjeta);
   border-radius: var(--radio);
   padding: 1.5rem;
   box-shadow: var(--sombra);
   border-top: 4px solid var(--azul-erasmus);
-  transition: transform 0.2s;
-  opacity: 1;        /* ← siempre visible */
-  display: block;    /* ← siempre visible */
+  
+  /* Transiciones para que el movimiento del ratón sea fluido */
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.3s ease;
+  transform-style: preserve-3d;
+  opacity: 0; /* Empiezan invisibles para la animación */
+  overflow: hidden;
 }
-article.tarjeta:hover { transform: translateY(-4px); }
 
+/* Sombra dinámica al pasar el ratón */
+article.tarjeta:hover { 
+  box-shadow: 0 20px 40px rgba(0, 61, 165, 0.15); /* Sombra tintada con el azul Erasmus */
+  z-index: 10;
+}
+
+/* 🔦 Efecto Spotlight: El foco de luz que sigue al ratón */
+article.tarjeta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    600px circle at var(--mouse-x) var(--mouse-y), 
+    rgba(0, 61, 165, 0.04), /* Luz azul muy sutil */
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Para que el JS siga leyendo el ratón en la tarjeta real */
+  z-index: 1;
+}
+
+article.tarjeta:hover::before {
+  opacity: 1;
+}
+
+/* Empujamos el contenido hacia afuera (Efecto Parallax 3D) */
+.contenido-tarjeta {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(30px);
+  pointer-events: none; /* Evita que los textos interfieran con la detección del ratón */
+}
+
+/* Animación en cascada de entrada */
+.animar-entrada {
+  animation: aparecerArriba 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes aparecerArriba {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tipografía de la tarjeta */
 .tarjeta .pais { font-size: 0.8rem; font-weight: 700;
   color: var(--azul-erasmus); text-transform: uppercase;
   letter-spacing: 0.05em; margin-bottom: 0.5rem; }
@@ -60,10 +112,7 @@ article.tarjeta:hover { transform: translateY(-4px); }
   line-height: 1.4; }
 .tarjeta p { color: var(--texto-suave); font-size: 0.95rem;
   line-height: 1.6; margin-bottom: 1rem; }
-.tarjeta .fecha { font-size: 0.8rem; color: var(--texto-suave); }
-.tarjeta .autor { font-size: 0.85rem; font-weight: 600;
-  color: var(--azul-erasmus); text-decoration: none; }
-.tarjeta .autor:hover { text-decoration: underline; }
+.tarjeta .fecha { font-size: 0.8rem; color: var(--texto-suave); margin-bottom: 0; }
 
 /* Footer */
 footer { text-align: center; padding: 2rem;
