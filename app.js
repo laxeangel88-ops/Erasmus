@@ -1,77 +1,105 @@
-const FEED_ORIGINAL = 'https://iesaljada.murciaeduca.es/feed/';
-const PROXY_URL = `https://corsproxy.io/?url=${encodeURIComponent(FEED_ORIGINAL)}`;
+// ─── FEEDS ───────────────────────────────────────────────────
+const FEEDS = [
+  {
+    url: 'https://iesaljada.murciaeduca.es/feed/',
+    fuente: 'aljada',
+    etiqueta: 'IES Aljada'
+  },
+  {
+    url: 'https://iesjoseplanes.es/feed/',
+    fuente: 'joseplanes',
+    etiqueta: 'IES Jose Planes'
+  }
+];
 
+const proxy = url =>
+  `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+
+// ─── FUNCIÓN PRINCIPAL ───────────────────────────────────────
 async function cargarFeed() {
   const contenedor = document.getElementById('feed');
+  contenedor.innerHTML = '<p class="cargando">Cargando noticias...</p>';
 
   try {
-    const respuesta = await fetch(PROXY_URL);
-    const textoXML  = await respuesta.text();
+    // Cargamos los dos feeds en paralelo
+    const resultados = await Promise.allSettled(
+      FEEDS.map(f => fetch(proxy(f.url)).then(r => r.text()))
+    );
 
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(textoXML, 'application/xml');
+    contenedor.innerHTML = '';
+    let totalItems = 0;
 
-    if (xmlDoc.querySelector('parsererror')) {
-      contenedor.innerHTML = '<p class="cargando">Error al leer el feed.</p>';
-      return;
-    }
+    resultados.forEach((resultado, i) => {
+      if (resultado.status !== 'fulfilled') return;
 
-    const items = Array.from(xmlDoc.getElementsByTagName('item'));
+      const { fuente, etiqueta } = FEEDS[i];
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(resultado.value, 'application/xml');
 
-    if (items.length === 0) {
+      if (xmlDoc.querySelector('parsererror')) return;
+
+      const items = Array.from(xmlDoc.getElementsByTagName('item'));
+
+      items.forEach(item => {
+        const titulo      = item.getElementsByTagName('title')[0]?.textContent || 'Sin título';
+        const descripcion = item.getElementsByTagName('description')[0]?.textContent || '';
+        const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
+        const enlace      = item.getElementsByTagName('link')[0]?.textContent || '#';
+        const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
+
+        const tmp = document.createElement('div');
+        tmp.innerHTML = descripcion;
+        const textoLimpio = (tmp.textContent || '').substring(0, 200);
+
+        const tarjeta = document.createElement('article');
+        tarjeta.className = 'tarjeta';
+        tarjeta.dataset.fuente    = fuente;
+        tarjeta.dataset.categoria = categoriaRaw.toLowerCase();
+        tarjeta.style.display     = 'block';
+
+        const pFuente = document.createElement('p');
+        pFuente.className = 'fuente-tag fuente-' + fuente;
+        pFuente.textContent = etiqueta;
+
+        const pPais = document.createElement('p');
+        pPais.className = 'pais';
+        pPais.textContent = categoriaRaw;
+
+        const h2 = document.createElement('h2');
+        h2.textContent = titulo;
+
+        const pDesc = document.createElement('p');
+        pDesc.textContent = textoLimpio + '...';
+
+        const pFecha = document.createElement('p');
+        pFecha.className = 'fecha';
+        pFecha.textContent = new Date(fecha).toLocaleDateString('es-ES', {
+          day: 'numeric', month: 'long', year: 'numeric'
+        });
+
+        const a = document.createElement('a');
+        a.className = 'autor';
+        a.href = enlace;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'Leer noticia completa →';
+
+        tarjeta.appendChild(pFuente);
+        tarjeta.appendChild(pPais);
+        tarjeta.appendChild(h2);
+        tarjeta.appendChild(pDesc);
+        tarjeta.appendChild(pFecha);
+        tarjeta.appendChild(a);
+
+        contenedor.appendChild(tarjeta);
+        totalItems++;
+      });
+    });
+
+    if (totalItems === 0) {
       contenedor.innerHTML = '<p class="cargando">Sin noticias por ahora.</p>';
       return;
     }
-
-    contenedor.innerHTML = '';
-
-    items.forEach(item => {
-      const titulo      = item.getElementsByTagName('title')[0]?.textContent || 'Sin título';
-      const descripcion = item.getElementsByTagName('description')[0]?.textContent || '';
-      const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
-      const enlace      = item.getElementsByTagName('link')[0]?.textContent || '#';
-      const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
-
-      const tmp = document.createElement('div');
-      tmp.innerHTML = descripcion;
-      const textoLimpio = (tmp.textContent || '').substring(0, 200);
-
-      const tarjeta = document.createElement('article');
-      tarjeta.className = 'tarjeta';
-      tarjeta.dataset.categoria = categoriaRaw.toLowerCase();
-      tarjeta.style.display = 'block'; // ← forzamos que sean visibles al crear
-
-      const pPais = document.createElement('p');
-      pPais.className = 'pais';
-      pPais.textContent = categoriaRaw;
-
-      const h2 = document.createElement('h2');
-      h2.textContent = titulo;
-
-      const pDesc = document.createElement('p');
-      pDesc.textContent = textoLimpio + '...';
-
-      const pFecha = document.createElement('p');
-      pFecha.className = 'fecha';
-      pFecha.textContent = new Date(fecha).toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      });
-
-      const a = document.createElement('a');
-      a.className = 'autor';
-      a.href = enlace;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = 'Leer noticia completa →';
-
-      tarjeta.appendChild(pPais);
-      tarjeta.appendChild(h2);
-      tarjeta.appendChild(pDesc);
-      tarjeta.appendChild(pFecha);
-      tarjeta.appendChild(a);
-
-      contenedor.appendChild(tarjeta);
-    });
 
     activarFiltros();
 
@@ -81,6 +109,7 @@ async function cargarFeed() {
   }
 }
 
+// ─── FILTROS ─────────────────────────────────────────────────
 function activarFiltros() {
   const botones    = document.querySelectorAll('.filtro-btn');
   const contenedor = document.getElementById('feed');
@@ -90,18 +119,18 @@ function activarFiltros() {
       botones.forEach(b => b.classList.remove('activo'));
       boton.classList.add('activo');
 
-      const categoria = boton.dataset.cat;
+      const fuente   = boton.dataset.fuente || 'todos';
+      const categoria = boton.dataset.cat   || 'todos';
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
       tarjetas.forEach(tarjeta => {
-        tarjeta.style.display =
-          (categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria))
-          ? 'block'
-          : 'none';
+        const coincideFuente   = fuente === 'todos'    || tarjeta.dataset.fuente === fuente;
+        const coincideCategoria = categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria);
+        tarjeta.style.display = (coincideFuente && coincideCategoria) ? 'block' : 'none';
       });
     });
   });
 }
 
+// ─── ARRANQUE ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', cargarFeed);
-
