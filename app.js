@@ -25,55 +25,40 @@ async function cargarFeed() {
 
     contenedor.innerHTML = '';
 
-    items.forEach(item => {
+    items.forEach((item, index) => {
       const titulo      = item.getElementsByTagName('title')[0]?.textContent || 'Sin título';
       const descripcion = item.getElementsByTagName('description')[0]?.textContent || '';
       const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
-      const enlace      = item.getElementsByTagName('link')[0]?.textContent || '#';
       const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
 
+      // Vuestro truco genial para limpiar etiquetas HTML
       const tmp = document.createElement('div');
       tmp.innerHTML = descripcion;
-      const textoLimpio = (tmp.textContent || '').substring(0, 200);
+      const textoLimpio = (tmp.textContent || '').substring(0, 180);
 
       const tarjeta = document.createElement('article');
-      tarjeta.className = 'tarjeta';
+      tarjeta.className = 'tarjeta animar-entrada'; // Clase para la animación de entrada
       tarjeta.dataset.categoria = categoriaRaw.toLowerCase();
-      tarjeta.style.display = 'block'; // ← forzamos que sean visibles al crear
+      tarjeta.style.animationDelay = `${index * 0.1}s`; // Retraso en cascada
 
-      const pPais = document.createElement('p');
-      pPais.className = 'pais';
-      pPais.textContent = categoriaRaw;
-
-      const h2 = document.createElement('h2');
-      h2.textContent = titulo;
-
-      const pDesc = document.createElement('p');
-      pDesc.textContent = textoLimpio + '...';
-
-      const pFecha = document.createElement('p');
-      pFecha.className = 'fecha';
-      pFecha.textContent = new Date(fecha).toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      });
-
-      const a = document.createElement('a');
-      a.className = 'autor';
-      a.href = enlace;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = 'Leer noticia completa →';
-
-      tarjeta.appendChild(pPais);
-      tarjeta.appendChild(h2);
-      tarjeta.appendChild(pDesc);
-      tarjeta.appendChild(pFecha);
-      tarjeta.appendChild(a);
+      // Estructura HTML limpia. Hemos quitado el "Leer noticia completa" 
+      // para priorizar un diseño visual limpio y sin distracciones.
+      tarjeta.innerHTML = `
+        <div class="contenido-tarjeta">
+            <p class="pais">${categoriaRaw}</p>
+            <h2>${titulo}</h2>
+            <p>${textoLimpio}...</p>
+            <p class="fecha">${new Date(fecha).toLocaleDateString('es-ES', {
+              day: 'numeric', month: 'long', year: 'numeric'
+            })}</p>
+        </div>
+      `;
 
       contenedor.appendChild(tarjeta);
     });
 
     activarFiltros();
+    activarEfectos3D(); // Desatamos la magia visual
 
   } catch (error) {
     console.error('Error:', error);
@@ -93,12 +78,50 @@ function activarFiltros() {
       const categoria = boton.dataset.cat;
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
+      // Transiciones suaves para los filtros en lugar de cortes bruscos
       tarjetas.forEach(tarjeta => {
-        tarjeta.style.display =
-          (categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria))
-          ? 'block'
-          : 'none';
+        if (categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria)) {
+          tarjeta.style.display = 'block';
+          setTimeout(() => tarjeta.style.opacity = '1', 10);
+        } else {
+          tarjeta.style.opacity = '0';
+          setTimeout(() => {
+              if (tarjeta.style.opacity === '0') {
+                  tarjeta.style.display = 'none';
+              }
+          }, 300);
+        }
       });
+    });
+  });
+}
+
+function activarEfectos3D() {
+  const tarjetas = document.querySelectorAll('.tarjeta');
+
+  tarjetas.forEach(tarjeta => {
+    tarjeta.addEventListener('mousemove', (e) => {
+      const rect = tarjeta.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Actualizamos las variables para el foco de luz
+      tarjeta.style.setProperty('--mouse-x', `${x}px`);
+      tarjeta.style.setProperty('--mouse-y', `${y}px`);
+
+      // Cálculo de la rotación 3D
+      const centroX = rect.width / 2;
+      const centroY = rect.height / 2;
+      const intensidad = 20; 
+      
+      const rotacionX = ((y - centroY) / centroY) * -intensidad;
+      const rotacionY = ((x - centroX) / centroX) * intensidad;
+
+      tarjeta.style.transform = `perspective(1000px) rotateX(${rotacionX}deg) rotateY(${rotacionY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+
+    tarjeta.addEventListener('mouseleave', () => {
+      tarjeta.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
     });
   });
 }
