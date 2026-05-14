@@ -115,7 +115,8 @@ function activarFiltros() {
   const contenedor = document.getElementById('feed');
 
   botones.forEach(boton => {
-    boton.addEventListener('click', () => {
+    boton.addEventListener('click', (e) => {
+      e.stopPropagation(); // ← evita que se cierre el dropdown
       botones.forEach(b => b.classList.remove('activo'));
       boton.classList.add('activo');
 
@@ -128,7 +129,6 @@ function activarFiltros() {
         const coincideCategoria = categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria);
         tarjeta.style.display   = (coincideFuente && coincideCategoria) ? 'block' : 'none';
       });
-      
     });
   });
 }
@@ -139,6 +139,7 @@ function activarDropdowns() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const dropdown = btn.parentElement;
+      // Cierra los demás al abrir uno
       document.querySelectorAll('.dropdown').forEach(d => {
         if (d !== dropdown) d.classList.remove('abierto');
       });
@@ -146,9 +147,11 @@ function activarDropdowns() {
     });
   });
 
-  // Cierra al hacer clic fuera
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
+  // Cierra solo al hacer clic fuera de los filtros
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.filtros')) {
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
+    }
   });
 }
 
