@@ -1,41 +1,58 @@
-<main>
-  <section class="filtros" aria-label="Filtrar noticias">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erasmus+ Feed | IES Aljada</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="alternate" type="application/rss+xml"
+        title="Erasmus+ IES Aljada" href="erasmus.xml">
+</head>
+<body>
 
-    <div class="filtro-grupo">
-      <button class="filtro-btn activo" data-fuente="todos" data-cat="todos">
-        🌐 Todos
-      </button>
+  <header>
+    <div class="header-content">
+      <h1>📡 Erasmus+ Feed</h1>
+      <p class="subtitle">Noticias en directo de nuestros alumnos en Europa</p>
     </div>
+  </header>
 
-    <div class="filtro-grupo">
-      <span class="filtro-label">IES Aljada</span>
-      <button class="filtro-btn" data-fuente="aljada" data-cat="todos">
-        Todas
-      </button>
-      <button class="filtro-btn" data-fuente="aljada" data-cat="actividades">
-        Actividades
-      </button>
-      <button class="filtro-btn" data-fuente="aljada" data-cat="alumnos">
-        Alumnos
-      </button>
-      <button class="filtro-btn" data-fuente="aljada" data-cat="noticias">
-        Noticias
-      </button>
-      <button class="filtro-btn" data-fuente="aljada" data-cat="familias">
-        Familias
-      </button>
-    </div>
+  <main>
+    <section class="filtros" aria-label="Filtrar noticias">
 
-    <div class="filtro-grupo">
-      <span class="filtro-label">IES Jose Planes</span>
-      <button class="filtro-btn" data-fuente="joseplanes" data-cat="todos">
-        Todas
-      </button>
-    </div>
+      <div class="filtro-grupo">
+        <button class="filtro-btn activo" data-fuente="todos" data-cat="todos">
+          🌐 Todos
+        </button>
+      </div>
 
-  </section>
+      <div class="filtro-grupo">
+        <span class="filtro-label">IES Aljada</span>
+        <button class="filtro-btn" data-fuente="aljada" data-cat="todos">Todas</button>
+        <button class="filtro-btn" data-fuente="aljada" data-cat="actividades">Actividades</button>
+        <button class="filtro-btn" data-fuente="aljada" data-cat="alumnos">Alumnos</button>
+        <button class="filtro-btn" data-fuente="aljada" data-cat="noticias">Noticias</button>
+        <button class="filtro-btn" data-fuente="aljada" data-cat="familias">Familias</button>
+      </div>
 
-  <section id="feed" class="feed-grid" aria-live="polite">
-    <p class="cargando">Cargando noticias Erasmus+...</p>
-  </section>
-</main>
+      <div class="filtro-grupo">
+        <span class="filtro-label">IES Jose Planes</span>
+        <button class="filtro-btn" data-fuente="joseplanes" data-cat="todos">Todas</button>
+      </div>
+
+    </section>
+
+    <section id="feed" class="feed-grid" aria-live="polite">
+      <p class="cargando">Cargando noticias Erasmus+...</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>IES Aljada &bull; Programa Erasmus+ &bull;
+      <a href="erasmus.xml">Ver feed RSS</a>
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
