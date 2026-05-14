@@ -126,4 +126,4 @@ function activarEfectos3D() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', cargarFeed);
+document.addEventListener('DOMContentLoaded', cargarFeed); 
