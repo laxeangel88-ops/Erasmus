@@ -1,6 +1,8 @@
+// ─── CONSTANTES Y RUTAS ───────────────────────────────────────
 const FEED_ORIGINAL = 'https://iesaljada.murciaeduca.es/feed/';
 const PROXY_URL = `https://corsproxy.io/?url=${encodeURIComponent(FEED_ORIGINAL)}`;
 
+// ─── 1. CARGA DE NOTICIAS (EL NÚCLEO) ─────────────────────────
 async function cargarFeed() {
   const contenedor = document.getElementById('feed');
 
@@ -31,18 +33,16 @@ async function cargarFeed() {
       const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
       const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
 
-      // Vuestro truco genial para limpiar etiquetas HTML
+      // Limpieza del texto para que no rompa el diseño
       const tmp = document.createElement('div');
       tmp.innerHTML = descripcion;
       const textoLimpio = (tmp.textContent || '').substring(0, 180);
 
       const tarjeta = document.createElement('article');
-      tarjeta.className = 'tarjeta animar-entrada'; // Clase para la animación de entrada
+      tarjeta.className = 'tarjeta animar-entrada';
       tarjeta.dataset.categoria = categoriaRaw.toLowerCase();
-      tarjeta.style.animationDelay = `${index * 0.1}s`; // Retraso en cascada
+      tarjeta.style.animationDelay = `${index * 0.1}s`;
 
-      // Estructura HTML limpia. Hemos quitado el "Leer noticia completa" 
-      // para priorizar un diseño visual limpio y sin distracciones.
       tarjeta.innerHTML = `
         <div class="contenido-tarjeta">
             <p class="pais">${categoriaRaw}</p>
@@ -57,8 +57,9 @@ async function cargarFeed() {
       contenedor.appendChild(tarjeta);
     });
 
+    // Activamos las funciones visuales cuando ya existen las tarjetas
     activarFiltros();
-    activarEfectos3D(); // Desatamos la magia visual
+    activarEfectos3D();
 
   } catch (error) {
     console.error('Error:', error);
@@ -66,6 +67,7 @@ async function cargarFeed() {
   }
 }
 
+// ─── 2. SISTEMA DE FILTROS SUAVES ─────────────────────────────
 function activarFiltros() {
   const botones    = document.querySelectorAll('.filtro-btn');
   const contenedor = document.getElementById('feed');
@@ -78,7 +80,6 @@ function activarFiltros() {
       const categoria = boton.dataset.cat;
       const tarjetas  = contenedor.querySelectorAll('.tarjeta');
 
-      // Transiciones suaves para los filtros en lugar de cortes bruscos
       tarjetas.forEach(tarjeta => {
         if (categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria)) {
           tarjeta.style.display = 'block';
@@ -96,6 +97,7 @@ function activarFiltros() {
   });
 }
 
+// ─── 3. EFECTOS 3D Y SPOTLIGHT ────────────────────────────────
 function activarEfectos3D() {
   const tarjetas = document.querySelectorAll('.tarjeta');
 
@@ -105,11 +107,9 @@ function activarEfectos3D() {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      // Actualizamos las variables para el foco de luz
       tarjeta.style.setProperty('--mouse-x', `${x}px`);
       tarjeta.style.setProperty('--mouse-y', `${y}px`);
 
-      // Cálculo de la rotación 3D
       const centroX = rect.width / 2;
       const centroY = rect.height / 2;
       const intensidad = 20; 
@@ -126,11 +126,8 @@ function activarEfectos3D() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', cargarFeed); 
-
-// ─── MODO CAOS: BROMA POP-UPS ─────────────────────────────────
+// ─── 4. LA BROMA (MODO CAOS) ──────────────────────────────────
 function iniciarBromaPopups() {
-  // Mensajes aleatorios para volverles locos
   const mensajesError = [
     "⚠️ ERROR Crítico: El esquema XSD de Ángel no responde.",
     "🔥 ALERTA: El Frontend de Francisco está consumiendo demasiada RAM.",
@@ -140,19 +137,16 @@ function iniciarBromaPopups() {
     "⚠️ Error 404: Paciencia no encontrada."
   ];
 
-  // Cada 3.5 segundos sale un pop-up nuevo
   setInterval(() => {
     const popup = document.createElement('div');
     popup.className = 'popup-molesto';
 
-    // Calculamos una posición aleatoria en la pantalla
     const randomX = Math.floor(Math.random() * (window.innerWidth - 300));
     const randomY = Math.floor(Math.random() * (window.innerHeight - 150));
     
     popup.style.left = `${randomX}px`;
     popup.style.top = `${randomY}px`;
 
-    // Elegimos un mensaje al azar
     const mensajeAleatorio = mensajesError[Math.floor(Math.random() * mensajesError.length)];
 
     popup.innerHTML = `
@@ -168,15 +162,18 @@ function iniciarBromaPopups() {
 
     document.body.appendChild(popup);
 
-    // Lógica para que los botones cierren SU propio pop-up
     const btnCerrar = popup.querySelector('.cerrar-popup');
     const btnOk = popup.querySelector('.btn-ok');
 
     btnCerrar.addEventListener('click', () => popup.remove());
     btnOk.addEventListener('click', () => popup.remove());
 
-  }, 3500); // 3500 milisegundos = 3.5 segundos. ¡Bájalo si quieres más caos!
+  }, 5000); // 3500ms = 3.5 segundos. 
 }
 
-// ⚠️ DESCOMENTA LA SIGUIENTE LÍNEA PARA ACTIVAR LA BROMA ⚠️
-// iniciarBromaPopups();
+// ─── ARRANQUE GLOBAL ──────────────────────────────────────────
+// Esto asegura que TODO cargue en el orden correcto
+document.addEventListener('DOMContentLoaded', () => {
+  cargarFeed();
+  iniciarBromaPopups(); // <-- ¡AQUÍ EMPIEZA LA FIESTA!
+});
