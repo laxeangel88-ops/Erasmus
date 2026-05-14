@@ -237,3 +237,4 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarBromaPopups();
   mostrarPopupHackeo(); // Iniciamos también la pantalla del "hacker"
 });
+ 
