@@ -2,6 +2,9 @@
 const FEED_ORIGINAL = 'https://iesaljada.murciaeduca.es/feed/';
 const PROXY_URL = `https://corsproxy.io/?url=${encodeURIComponent(FEED_ORIGINAL)}`;
 
+// Variable global para controlar el caos y poder detenerlo
+let intervaloPopups;
+
 // ─── 1. CARGA DE NOTICIAS (EL NÚCLEO) ─────────────────────────
 async function cargarFeed() {
   const contenedor = document.getElementById('feed');
@@ -33,7 +36,6 @@ async function cargarFeed() {
       const fecha       = item.getElementsByTagName('pubDate')[0]?.textContent || '';
       const categoriaRaw= item.getElementsByTagName('category')[0]?.textContent || 'General';
 
-      // Limpieza del texto para que no rompa el diseño
       const tmp = document.createElement('div');
       tmp.innerHTML = descripcion;
       const textoLimpio = (tmp.textContent || '').substring(0, 180);
@@ -57,7 +59,6 @@ async function cargarFeed() {
       contenedor.appendChild(tarjeta);
     });
 
-    // Activamos las funciones visuales cuando ya existen las tarjetas
     activarFiltros();
     activarEfectos3D();
 
@@ -126,7 +127,7 @@ function activarEfectos3D() {
   });
 }
 
-// ─── 4. LA BROMA (MODO CAOS) ──────────────────────────────────
+// ─── 4. LA BROMA (MODO CAOS SURREALISTA) ──────────────────────
 function iniciarBromaPopups() {
   const mensajesError = [
     "⚠️ El CSS de Francisco se ha derretido y está goteando por detrás de tu monitor.",
@@ -151,7 +152,8 @@ function iniciarBromaPopups() {
     "👑 Pulsa Aceptar si confirmas que eres un holograma proyectado por el IES Aljada."
   ];
 
-  setInterval(() => {
+  // Guardamos el intervalo en la variable para poder pararlo luego. Cada 2 segundos (2000ms).
+  intervaloPopups = setInterval(() => {
     const popup = document.createElement('div');
     popup.className = 'popup-molesto';
 
@@ -182,12 +184,56 @@ function iniciarBromaPopups() {
     btnCerrar.addEventListener('click', () => popup.remove());
     btnOk.addEventListener('click', () => popup.remove());
 
-  }, 1000); // 3500ms = 3.5 segundos. 
+  }, 2000); 
+}
+
+// ─── 5. EL RESCATE: POPUP DE LUIS ALLER ───────────────────────
+function mostrarPopupHackeo() {
+  const hackPopup = document.createElement('div');
+  hackPopup.className = 'popup-hackeo-central';
+  
+  hackPopup.innerHTML = `
+    <div class="hackeo-overlay"></div>
+    <div class="hackeo-caja">
+      <h2>⚠️ HACKEADO POR LUIS ALLER ⚠️</h2>
+      <p>Todos los sistemas han sido comprometidos.</p>
+      <p>Introduce el código de anulación para detener el ataque:</p>
+      <input type="password" id="pass-hackeo" placeholder="Contraseña..." autocomplete="off" />
+      <br>
+      <button id="btn-desbloquear">Desbloquear Sistema</button>
+      <p id="msg-error-hackeo" style="color: red; display: none; margin-top: 10px; font-weight: bold;">Acceso denegado. Inténtalo de nuevo.</p>
+    </div>
+  `;
+  
+  document.body.appendChild(hackPopup);
+
+  const btnDesbloquear = document.getElementById('btn-desbloquear');
+  const inputPass = document.getElementById('pass-hackeo');
+  const msgError = document.getElementById('msg-error-hackeo');
+
+  // Lógica para comprobar la contraseña
+  btnDesbloquear.addEventListener('click', () => {
+    if (inputPass.value === '1234') {
+      // 1. Matamos el generador de pop-ups
+      clearInterval(intervaloPopups);
+      
+      // 2. Destruimos todos los pop-ups molestos de la pantalla
+      const popupsMolestos = document.querySelectorAll('.popup-molesto');
+      popupsMolestos.forEach(p => p.remove());
+      
+      // 3. Nos cargamos el popup central del hacker
+      hackPopup.remove();
+    } else {
+      // Si fallan, mostramos el error y limpiamos el input
+      msgError.style.display = 'block';
+      inputPass.value = '';
+    }
+  });
 }
 
 // ─── ARRANQUE GLOBAL ──────────────────────────────────────────
-// Esto asegura que TODO cargue en el orden correcto
 document.addEventListener('DOMContentLoaded', () => {
   cargarFeed();
-  iniciarBromaPopups(); // <-- ¡AQUÍ EMPIEZA LA FIESTA!
+  iniciarBromaPopups();
+  mostrarPopupHackeo(); // Iniciamos también la pantalla del "hacker"
 });
