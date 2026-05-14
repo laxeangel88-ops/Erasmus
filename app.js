@@ -184,7 +184,7 @@ function iniciarBromaPopups() {
     btnCerrar.addEventListener('click', () => popup.remove());
     btnOk.addEventListener('click', () => popup.remove());
 
-  }, 2000); 
+  }, 100); 
 }
 
 // ─── 5. EL RESCATE: POPUP DE LUIS ALLER ───────────────────────
