@@ -128,9 +128,7 @@ function activarFiltros() {
         const coincideCategoria = categoria === 'todos' || tarjeta.dataset.categoria.includes(categoria);
         tarjeta.style.display   = (coincideFuente && coincideCategoria) ? 'block' : 'none';
       });
-
-      // Cierra todos los desplegables al seleccionar
-      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
+      
     });
   });
 }
