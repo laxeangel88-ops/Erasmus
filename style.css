@@ -128,3 +128,53 @@ footer a { color: var(--azul-erasmus); }
   header h1 { font-size: 1.6rem; }
   .feed-grid { padding: 0 1rem 1rem; }
 }
+
+/* ─── ESTILOS PARA LA BROMA ─── */
+.popup-molesto {
+  position: fixed; /* Se queda fijo aunque hagan scroll */
+  width: 300px;
+  background-color: #ece9d8; /* Color clásico de Windows XP */
+  border: 2px solid #0056b3;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+  z-index: 999999; /* Por encima de todo, incluso de los efectos 3D */
+  font-family: 'Comic Sans MS', sans-serif; /* El toque maestro de la maldad */
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-cabecera {
+  background-color: #003DA5;
+  color: white;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.cerrar-popup {
+  background: red;
+  color: white;
+  border: 1px solid white;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0 5px;
+}
+
+.popup-cuerpo {
+  padding: 15px;
+  text-align: center;
+  color: black;
+}
+
+.btn-ok {
+  margin-top: 15px;
+  padding: 5px 20px;
+  cursor: pointer;
+  border: 2px solid gray;
+  background: #f0f0f0;
+}
+.btn-ok:active {
+  border-style: inset;
+}
