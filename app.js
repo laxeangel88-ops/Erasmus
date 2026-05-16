@@ -12,8 +12,42 @@ const FEEDS = [
   }
 ];
 
-const proxy = url =>
-  `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+// ─── PROXIES (se intentan en orden hasta que uno funcione) ───
+const PROXIES = [
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://cors-anywhere.herokuapp.com/${url}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
+// Devuelve el texto del feed usando el primer proxy que responda con XML válido
+async function fetchConProxy(feedUrl) {
+  for (const proxyFn of PROXIES) {
+    try {
+      const proxyUrl = proxyFn(feedUrl);
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+
+      // allorigins devuelve JSON con { contents: "..." }
+      const contentType = res.headers.get('content-type') || '';
+      let texto;
+      if (contentType.includes('application/json')) {
+        const json = await res.json();
+        texto = json.contents ?? json.data ?? '';
+      } else {
+        texto = await res.text();
+      }
+
+      // Verificación mínima: debe parecer XML/RSS
+      if (texto && texto.trim().startsWith('<') && texto.includes('<item')) {
+        return texto;
+      }
+    } catch (_) {
+      // Este proxy falló; probar el siguiente
+    }
+  }
+  throw new Error(`No se pudo obtener el feed: ${feedUrl}`);
+}
 
 // ─── FUNCIÓN PRINCIPAL ───────────────────────────────────────
 async function cargarFeed() {
@@ -22,20 +56,26 @@ async function cargarFeed() {
 
   try {
     const resultados = await Promise.allSettled(
-      FEEDS.map(f => fetch(proxy(f.url)).then(r => r.text()))
+      FEEDS.map(f => fetchConProxy(f.url))
     );
 
     contenedor.innerHTML = '';
     let totalItems = 0;
 
     resultados.forEach((resultado, i) => {
-      if (resultado.status !== 'fulfilled') return;
+      if (resultado.status !== 'fulfilled') {
+        console.warn(`Feed ${FEEDS[i].etiqueta} no disponible:`, resultado.reason);
+        return;
+      }
 
       const { fuente, etiqueta } = FEEDS[i];
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(resultado.value, 'application/xml');
 
-      if (xmlDoc.querySelector('parsererror')) return;
+      if (xmlDoc.querySelector('parsererror')) {
+        console.warn(`XML inválido en ${etiqueta}`);
+        return;
+      }
 
       const items = Array.from(xmlDoc.getElementsByTagName('item'));
 
@@ -81,7 +121,7 @@ async function cargarFeed() {
         a.href = enlace;
         a.target = '_blank';
         a.rel = 'noopener';
-        a.textContent = 'Leer noticia completa →';
+        a.textContent = 'Leer noticia completa';
 
         tarjeta.appendChild(pFuente);
         tarjeta.appendChild(pPais);
@@ -116,7 +156,7 @@ function activarFiltros() {
 
   botones.forEach(boton => {
     boton.addEventListener('click', (e) => {
-      e.stopPropagation(); // ← evita que se cierre el dropdown
+      e.stopPropagation();
       botones.forEach(b => b.classList.remove('activo'));
       boton.classList.add('activo');
 
@@ -139,7 +179,6 @@ function activarDropdowns() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const dropdown = btn.parentElement;
-      // Cierra los demás al abrir uno
       document.querySelectorAll('.dropdown').forEach(d => {
         if (d !== dropdown) d.classList.remove('abierto');
       });
@@ -147,7 +186,6 @@ function activarDropdowns() {
     });
   });
 
-  // Cierra solo al hacer clic fuera de los filtros
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.filtros')) {
       document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
